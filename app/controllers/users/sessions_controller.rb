@@ -5,11 +5,15 @@ class Users::SessionsController < Devise::SessionsController
   private def respond_with(current_user, _opts = {})
     puts "Current user: #{current_user.inspect}"
     if current_user
+      token = Warden::JWTAuth::UserEncoder.new.call(current_user, :user, nil).first
       render json: {
         status: {
           code: 200,
           message: 'Logged in successfully.',
-          data: { user: UserSerializer.new(current_user).serializable_hash[:data][:attributes] }
+          data: {
+            user: UserSerializer.new(current_user).serializable_hash[:data][:attributes],
+            token: token
+          }
         }
       }, status: :ok
     else
